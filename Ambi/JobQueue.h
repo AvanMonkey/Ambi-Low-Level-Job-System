@@ -1,16 +1,15 @@
 #pragma once
 #include <functional>
 /**
-	 * @class JobQueue
-	 * @brief Global Queue for Jobs. This class is responsible for managing the global queue of jobs that will be distributed to worker threads.
-	 * 
-	 * Contains the Jobs that need to be processed by the worker threads. The JobQueue class provides methods to add jobs to the queue and retrieve the current queue of jobs.
-	*/
+* @class JobQueue
+* @brief Global Queue for Jobs. This class is responsible for managing the global queue of jobs that will be distributed to worker threads.
+* 
+* Contains the Jobs that need to be processed by the worker threads. The JobQueue class provides methods to add jobs to the queue and retrieve the current queue of jobs.
+*/
 class JobQueue
 {
 public:
-	JobQueue();
-	~JobQueue();
+	JobQueue() = default;
 
 	/**
 	 * @brief Jobs will vary in their bodies, so we use std::function to allow for any callable type to be added as a job.
@@ -28,7 +27,7 @@ public:
 	 * The developer cannot edit the queue directly, but they can see the current state of the queue and how many jobs are currently in it. This is useful for debugging and monitoring the job queue.
 	 * @return The Global Job Queue
 	*/
-	const std::vector<std::function<void()>>& GetJobs();
+	const std::vector<std::function<void()>>& GetJobs() { return globalJobQueue; };
 
 	/**
 	 * @brief Distribute Jobs to worker threads.
