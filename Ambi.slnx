@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="Ambi/Ambi.vcxproj" />
+  <Project Path="Ambi/Ambi.vcxproj" Id="4d8a0926-4170-44d1-bc2b-c874343b1e12" />
 </Solution>
