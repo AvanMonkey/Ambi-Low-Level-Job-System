@@ -4,4 +4,5 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="Ambi/Ambi.vcxproj" Id="4d8a0926-4170-44d1-bc2b-c874343b1e12" />
+  <Project Path="AmbiTests/AmbiTests.vcxproj" Id="87f06141-055d-47aa-b2f3-3b7024ebb7a9" />
 </Solution>
