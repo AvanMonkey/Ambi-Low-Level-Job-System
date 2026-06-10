@@ -150,6 +150,7 @@
   <ItemGroup>
     <ClInclude Include="JobQueue.h" />
     <ClInclude Include="LocalJobQueue.h" />
+    <ClInclude Include="WorkerThreads.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
