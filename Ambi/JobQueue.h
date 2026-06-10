@@ -27,14 +27,7 @@ public:
 	 * The developer cannot edit the queue directly, but they can see the current state of the queue and how many jobs are currently in it. This is useful for debugging and monitoring the job queue.
 	 * @return The Global Job Queue
 	*/
-	const std::vector<std::function<void()>>& GetJobs() { return jobQueue; };
-
-	/**
-	 * @brief Distribute Jobs to worker threads.
-	 *
-	 * Jobs will be distributed depending on the amount of worker threads are requested to be used by the developer. Maximum will be the amount of threads the device has.
-	*/
-	void virtual ProcessJobs();
+	std::vector<std::function<void()>>& GetJobs() { return jobQueue; };
 private:
 
 	/**

@@ -40,6 +40,22 @@ public:
 	 * For accessing the job queues of threads. Their index corresponds to the worker thread in the 'threads' vector.
 	*/
 	std::vector<LocalJobQueue>& getThreadsJobQueues() { return threadsJobQueues; };
+
+	/**
+	* @brief Add the global jobs to the local queues of the worker threads.
+	* 
+	*  Self Explanatory
+	* 
+	* @param globalJobQueue The global job queue that contains the jobs to be distributed to the worker threads. Passed by reference since we need to access the singular job queue throughout the whole program
+	*/
+	void distributeJobsToLocalQueues(JobQueue& globalJobQueue);
+
+	/**
+	 * @brief Execute the jobs on the worker threads.
+	 *
+	 * This will execute the jobs on the worker threads, Creating a new thread for each worker thread and execute the jobs in their local queues. It will then join the threads when done.
+	*/
+	void executeJobs();
 private:
 
 	/**
