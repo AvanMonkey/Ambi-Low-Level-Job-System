@@ -37,5 +37,5 @@ private:
 	 * @brief Vector of the worker threads available for use.
 	 *  Initialised in the constructor
 	*/
-	std::vector<std::thread> threads;
+	const std::vector<std::thread> threads;
 };
