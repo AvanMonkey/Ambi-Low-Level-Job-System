@@ -14,11 +14,11 @@ public:
 	/**
 	 * @brief Jobs will vary in their bodies, so we use std::function to allow for any callable type to be added as a job.
 	 *
-	 * Add Jobs to the global queue. This queue will later be distributed across each available worker thread. This will obviously depend on the implementation of the thread pool and worker threads,
-	 * but the idea is that each worker thread will pull jobs from this global queue and execute them.
-	 * @param job The Job to be added to the global queue. This is a std::function that represents any callable type, allowing for flexibility in the types of jobs that can be added to the queue
+	 * Add Jobs to the queue. This queue will later be distributed across each available worker thread. This will obviously depend on the implementation of the thread pool and worker threads,
+	 * but the idea is that each worker thread will pull jobs from this queue and execute them.
+	 * @param job The Job to be added to the queue. This is a std::function that represents any callable type, allowing for flexibility in the types of jobs that can be added to the queue
 	*/
-	void virtual AddJob(std::function<void()> job);
+	void AddJob(std::function<void()> job);
 
 	/**
 	 * @brief A method to retrieve the current queue of jobs. This allows worker threads to access the jobs they need to process, with a reference being returned so the user can see the current state of the queue.
@@ -38,9 +38,9 @@ public:
 private:
 
 	/**
-	 * @brief The Vector that holds the global queue of jobs.
+	 * @brief The Vector that holds the queue of jobs.
 	 *
-	 * Holds all global jobs that need to be processed by the worker threads.
+	 * Holds all jobs that need to be processed by the worker threads.
 	*/
 	std::vector<std::function<void()>> jobQueue;
 };
