@@ -13,14 +13,6 @@ public:
 	LocalJobQueue() = default;
 
 	/**
-	 * @brief Add a job to the local queue.
-	 *
-	 * Override Base method to add a job to the local queue for the designated worker thread.
-	 * @param job The Job to be added to the local queue. This is a std::function that represents any callable type, allowing for flexibility in the types of jobs that can be added to the queue
-	 */
-	void AddJob(std::function<void()> job) override;
-
-	/**
 	 * @brief Process the jobs in the local queue.
 	 *
 	 * Override Base method to process the jobs in the local queue. This will be used by each worker thread to process the jobs that are assigned to it, and later on, will steal jobs from other workers.
