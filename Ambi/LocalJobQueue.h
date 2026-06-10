@@ -15,7 +15,7 @@ public:
 	/**
 	 * @brief Process the jobs in the local queue.
 	 *
-	 * Override Base method to process the jobs in the local queue. This will be used by each worker thread to process the jobs that are assigned to it, and later on, will steal jobs from other workers.
+	 * Process the jobs in the local queue. This will be used by each worker thread to process the jobs that are assigned to it, and later on, will steal jobs from other workers.
 	 */
-	void ProcessJobs() override;
+	void ProcessJobs();
 };

@@ -2,6 +2,7 @@
 #include <vector>
 #include <thread>
 #include "LocalJobQueue.h"
+#include <iostream>
 
 /**
 * @class WorkerThreads
@@ -19,7 +20,19 @@ public:
 	 * Threads can be used to execute jobs in parallel, for more efficient processing.
 	*/
 	WorkerThreads() {
-		int numThreads = std::thread::hardware_concurrency();
+		int numThreads = 0;
+
+		if (std::thread::hardware_concurrency() != 0)
+		{
+			// See the number of threads available on the device's thread pool (-1 for main thread).
+			numThreads = std::thread::hardware_concurrency() - 1;
+		}
+		else
+		{
+			std::cout << "Not enough Threads to use this class";
+			throw;
+		}
+
 		for (int i = 0; i < numThreads - 1; i++) // Leave one thread for the main thread to run on
 		{
 			threads.emplace_back();
@@ -40,6 +53,22 @@ public:
 	 * For accessing the job queues of threads. Their index corresponds to the worker thread in the 'threads' vector.
 	*/
 	std::vector<LocalJobQueue>& getThreadsJobQueues() { return threadsJobQueues; };
+
+	/**
+	* @brief Add the global jobs to the local queues of the worker threads.
+	* 
+	*  Self Explanatory
+	* 
+	* @param globalJobQueue The global job queue that contains the jobs to be distributed to the worker threads. Passed by reference since we need to access the singular job queue throughout the whole program
+	*/
+	void distributeJobsToLocalQueues(JobQueue& globalJobQueue);
+
+	/**
+	 * @brief Execute the jobs on the worker threads.
+	 *
+	 * This will execute the jobs on the worker threads, Creating a new thread for each worker thread and execute the jobs in their local queues. It will then join the threads when done.
+	*/
+	void executeJobs();
 private:
 
 	/**
