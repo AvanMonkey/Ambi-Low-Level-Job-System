@@ -69,6 +69,9 @@ public:
 	 * This will execute the jobs on the worker threads, Creating a new thread for each worker thread and execute the jobs in their local queues. It will then join the threads when done.
 	*/
 	void executeJobs();
+
+	void stealJobsFromOtherThreads(); // TODO: Implement this function to allow for work stealing between threads. This will allow for more efficient processing of jobs, as threads that have finished their jobs can steal jobs from other threads that are still processing jobs.
+
 private:
 
 	/**
