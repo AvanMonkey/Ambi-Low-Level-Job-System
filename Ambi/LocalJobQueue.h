@@ -38,5 +38,10 @@ public:
 	bool stealJobs(std::vector<std::unique_ptr<LocalJobQueue>>& threadQueues, std::function<void()>& job);
 
 private:
+	/**
+	 * @brief Mutex for synchronizing access to shared resources.
+	 *
+	 * Ensures thread safety during job distribution and execution, preventing data races within the 'LocalJobQueue' class.
+	 */
 	std::mutex mtx;
 };

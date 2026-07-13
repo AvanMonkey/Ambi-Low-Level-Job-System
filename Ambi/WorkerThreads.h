@@ -77,9 +77,14 @@ public:
 	* This function enables work stealing between worker threads, improving overall processing efficiency.
 	*/
 	void stealJobsFromOtherThreads(); 
-
-	std::mutex mutex; // Mutex for synchronizing access to shared resources, ensuring thread safety during job distribution and execution
 private:
+
+	/**
+	 * @brief Mutex for synchronizing access to shared resources.
+	 *
+	 * Ensures thread safety during job distribution and execution, preventing data races within the 'WorkerThreads' class.
+	 */
+	std::mutex mutex;
 
 	/**
 	 * @brief Vector of the worker threads available for use.
