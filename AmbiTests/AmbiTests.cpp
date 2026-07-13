@@ -63,8 +63,6 @@ int main()
 	workerThreads.distributeJobsToLocalQueues(globalJobQueue); // Distribute the jobs to the local queues of the worker threads
 	workerThreads.executeJobs(); // Execute the jobs on the worker threads
 
-	std::cout << "Number of Jobs: " << globalJobQueue.GetJobs().size() << "\n\n";
-
 	std::cout << "All jobs processed.\n";
 	return 0;
 }
