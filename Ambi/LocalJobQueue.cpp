@@ -8,28 +8,32 @@ void LocalJobQueue::ProcessJobs(std::vector<std::unique_ptr<LocalJobQueue>>& thr
 	while (true)
 	{
 		std::function<void()> job;
+		if (!jobs.empty())
 		{
-			std::lock_guard<std::mutex> lock(this->mtx);
-			if (!jobs.empty())
 			{
+				std::lock_guard<std::mutex> lock(this->mtx);
 				job = std::move(jobs.front());
 				jobs.erase(jobs.begin()); // Remove the job from the queue since its being executed
 			}
+			job(); // Execute the job. Deal with it now so we dont accidentally overwrite it when we steal a job from another thread
 		}
-		// Leave the mutex here, we dont need to hold it and doing so will result in a dead lock in the 'stealJobs' function since it also needs to lock the mutex of the other thread's job queue
-		if (!stealJobs(threadQueues, job))
+
+		if (jobs.empty() && stealJobs(threadQueues, job))
+		{
+			job(); // Job will be changed to the stolen job in the 'stealJobs' function, so we can execute it here
+		}
+		else if (jobs.empty() && !stealJobs(threadQueues, job))
 		{
 			break; // No more jobs to process and no jobs to steal
 		}
-		job(); // Execute the job outside of the lock to avoid blocking other threads
 	}
 }
 
 bool LocalJobQueue::stealJobs(std::vector<std::unique_ptr<LocalJobQueue>>& threadQueues, std::function<void()>& job)
 {
-	if (threadQueues.size() <= 1)
+	if (threadQueues.size() < 2)
 	{
-		return false; // No other threads to steal from
+		return false; // No other threads to steal from (Need atleast 3 present if we wanna steal jobs)
 	}
 
 	for (int i = 0; i < threadQueues.size(); ++i)

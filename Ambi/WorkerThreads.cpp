@@ -32,14 +32,13 @@ void WorkerThreads::executeJobs()
 		threadsJobQueues[i]->ProcessJobs(threadsJobQueues); // We use a lamda since we need to create a new thread each time
 	}
 
-	// Join the threads when done
 	for (auto& thread : threadsInUse)
 	{
 		for (auto& threadQueue : threadsJobQueues)
 		{
 			if (thread.joinable())
 			{
-				thread.join();
+				thread.join(); // Join the threads when done
 			}
 		}
 	}

@@ -33,14 +33,14 @@ int main()
 	std::uniform_int_distribution<int> dist(min, max);
 	int numThreads = 0;
 
-	if (std::thread::hardware_concurrency() != 0)
+	if (std::thread::hardware_concurrency() > 1)
 	{
 		// See the number of threads available on the device's thread pool (-1 for main thread).
 		numThreads = std::thread::hardware_concurrency() - 1;
 	}
 	else
 	{
-		std::cout << "Not enough Threads to use this class";
+		std::cout << "Not enough Threads to use this library";
 		throw;
 	}
 
@@ -62,6 +62,8 @@ int main()
 
 	workerThreads.distributeJobsToLocalQueues(globalJobQueue); // Distribute the jobs to the local queues of the worker threads
 	workerThreads.executeJobs(); // Execute the jobs on the worker threads
+
+	std::cout << "Number of Jobs: " << globalJobQueue.GetJobs().size() << "\n\n";
 
 	std::cout << "All jobs processed.\n";
 	return 0;
