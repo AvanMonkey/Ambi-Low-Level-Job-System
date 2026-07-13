@@ -23,7 +23,7 @@ int main()
 	WorkerThreads workerThreads;
 	// Get the vectors by reference since there should only be one instance of the worker threads and their job queues. We also need to access them throughout the whole program
 	std::vector<std::thread>& threads = workerThreads.getThreads();
-	std::vector<LocalJobQueue>& threadsJobQueues = workerThreads.getThreadsJobQueues();
+	std::vector<std::unique_ptr<LocalJobQueue>>& threadsJobQueues = workerThreads.getThreadsJobQueues();
 
 	// Testing a bunch of random number of jobs
 	std::random_device rd;
