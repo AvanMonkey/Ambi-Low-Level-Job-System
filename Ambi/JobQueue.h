@@ -11,6 +11,11 @@ class JobQueue
 public:
 	JobQueue() = default;
 
+	JobQueue(const JobQueue&) = delete;
+	JobQueue& operator=(const JobQueue&) = delete;
+	JobQueue(JobQueue&&) = delete;
+	JobQueue& operator=(JobQueue&&) = delete;
+
 	/**
 	 * @brief Jobs will vary in their bodies, so we use std::function to allow for any callable type to be added as a job.
 	 *
