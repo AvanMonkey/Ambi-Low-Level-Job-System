@@ -451,6 +451,7 @@ BOOST_AUTO_TEST_SUITE_END()
 
 // -----------------------------------------------------------------------
 //                          Complex Scenarios
+//                (These were written by myself, NOT AI)
 // -----------------------------------------------------------------------
 BOOST_AUTO_TEST_SUITE(ComplexTests)
 
@@ -519,4 +520,76 @@ BOOST_AUTO_TEST_CASE(ExecuteJobs_ComplexScenario_SpeedComparison)
 	BOOST_TEST(parallelTime < sequentialTime);
 }
 
+// -------------------------------------------------------------------
+// Check if a thread will steal jobs from another thread that is specifically backed up with a large number of jobs
+// -------------------------------------------------------------------
+BOOST_AUTO_TEST_CASE(ExecuteJobs_ComplexScenario_LoadBalancing)
+{
+    WorkerThreads pool;
+    JobQueue globalJobQueue;
+
+    constexpr int totalJobs = 1000000;
+
+    if (std::thread::hardware_concurrency() < 3)
+    {
+        BOOST_TEST_MESSAGE("Skipping: not enough hardware threads.");
+        return;
+    }
+
+	std::atomic<size_t> nextIndex{ 0 }; // start at 1 since we will manually assign the first job to a thread to simulate a thread being backed up
+    std::vector<int> parallelNumbers(totalJobs); // pre-sized, no reallocation ever
+    std::vector<std::thread::id> executedBy(totalJobs);
+    std::thread::id bigJobThreadID;
+
+    // Singular Large Job to be used in 1 thread to simulate a thread being backed up, and the other threads will steal from it to balance the load
+    std::function<void()> job = [&parallelNumbers, &nextIndex, &executedBy, &bigJobThreadID]() {
+        size_t idx = nextIndex.fetch_add(1, std::memory_order_relaxed);
+        int sum = 0;
+        for (int i = 0; i < 1000000; ++i) sum += i;
+        parallelNumbers[idx] = sum;
+		bigJobThreadID = std::this_thread::get_id(); // store the thread ID of the thread that is executing this job. Should be thread 0, since it is the first thread in the array and will be distributed to it
+        };
+
+    globalJobQueue.AddJobs(job);
+
+    job = [&parallelNumbers, &nextIndex, &executedBy]() {
+        size_t idx = nextIndex.fetch_add(1, std::memory_order_relaxed);
+        int sum = 0;
+        for (int i = 0; i < 10000; ++i) sum += i; // simulate real work
+        parallelNumbers[idx] = sum;
+		executedBy[idx] = std::this_thread::get_id(); // store the thread ID of a thread that is executing this job. Should be different from the thread that is executing the big job, since it will be stolen from it
+        };
+
+
+    for (int i = 0; i < totalJobs - 1; ++i)
+    {
+        globalJobQueue.AddJobs(job);
+    };
+
+    pool.distributeJobsToLocalQueues(globalJobQueue);
+    pool.executeJobs();
+
+    BOOST_TEST(bigJobThreadID != std::thread::id{}); // sanity check :(
+
+	size_t numThreads = pool.getThreads().size();
+	// Chunks are used since its how many jobs would have been assigned to thread 0, where the big job was assigned to.
+    size_t chunkSize = totalJobs / numThreads; // assumes contiguous chunk distribution because we're using a vector to hold them
+	int stolenFromChunk = 0;
+
+    // We need to check how many jobs were stolen from the thread chunk.
+    for (size_t idx = 1; idx < chunkSize; ++idx)
+    {
+        if (executedBy[idx] != bigJobThreadID)
+        {
+            ++stolenFromChunk;
+        }
+    }
+
+    int notStolen = static_cast<int>(chunkSize - 1) - stolenFromChunk; // how many chunk-jobs thread 0 got to itself
+
+    printf("Jobs originally in backed-up thread's chunk (Not including the big job): %zu\n", chunkSize - 1);
+    printf("Jobs stolen from that chunk: %d\n", stolenFromChunk);
+    printf("Jobs not stolen from that chunk: %d\n", notStolen);
+    BOOST_TEST(stolenFromChunk > 0); // at least some stealing happened
+}
 BOOST_AUTO_TEST_SUITE_END()
