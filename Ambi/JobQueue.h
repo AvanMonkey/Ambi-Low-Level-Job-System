@@ -1,6 +1,8 @@
 #pragma once
 #include <functional>
 #include <mutex>
+#include <deque>
+
 /**
 * @class JobQueue
 * @brief Global Queue for Jobs. This class is responsible for managing the global queue of jobs that will be distributed to worker threads.
@@ -33,7 +35,7 @@ public:
 	 * The developer cannot edit the queue directly, but they can see the current state of the queue and how many jobs are currently in it. This is useful for debugging and monitoring the job queue.
 	 * @return The Global Job Queue
 	*/
-	std::vector<std::function<void()>>& GetJobs() { return jobQueue; };
+	std::deque<std::function<void()>>& GetJobs() { return jobQueue; };
 
 	/**
 	 * @brief Mutex for synchronizing access to shared resources.
@@ -47,6 +49,8 @@ private:
 	 * @brief The Vector that holds the queue of jobs.
 	 *
 	 * Holds all jobs that need to be processed by the worker threads.
+	 * 
+	 * Deque is used for efficiency and O(1) deletion at the front of the queue
 	*/
-	std::vector<std::function<void()>> jobQueue;
+	std::deque<std::function<void()>> jobQueue;
 };
