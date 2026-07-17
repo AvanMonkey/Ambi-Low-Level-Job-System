@@ -11,14 +11,26 @@ void LocalJobQueue::ProcessJobs(std::vector<std::unique_ptr<LocalJobQueue>>& thr
 		if (tryEraseJob(job))
 		{
 			job(); // Deal with it now so we dont accidentally overwrite it when we steal a job from another thread
+			continue;
+		}
+
+		bool isJobQueueEmpty;
+		{
+			std::lock_guard<std::mutex> lock(this->mtx);
+			isJobQueueEmpty = GetJobs().empty();
+		}
+
+		if (!isJobQueueEmpty)
+		{
+			continue;
 		}
 
 		// Try stealing if conditions are met
-		if (GetJobs().empty() && stealJobs(threadQueues, job))
+		if (stealJobs(threadQueues, job))
 		{
 			job(); // Job will be changed to the stolen job in the 'stealJobs' function, so we can execute it here
 		}
-		else if (GetJobs().empty() && !stealJobs(threadQueues, job))
+		else
 		{
 			break; // No more jobs to process and no jobs to steal
 		}
@@ -58,7 +70,7 @@ bool LocalJobQueue::tryEraseJob(std::function<void()>& job)
 	if (!GetJobs().empty())
 	{
 		job = std::move(GetJobs().front()); // (FIFO)
-		GetJobs().erase(GetJobs().begin()); // Remove the job from the Job queue since its being executed
+		GetJobs().pop_front(); // Remove the job from the Job queue since its being executed
 		return true;
 	}
 	return false;

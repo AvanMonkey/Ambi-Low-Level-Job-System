@@ -448,3 +448,75 @@ BOOST_AUTO_TEST_CASE(ExecuteJobs_RunsOnWorkerThreads_NotCallingThread)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+// -----------------------------------------------------------------------
+//                          Complex Scenarios
+// -----------------------------------------------------------------------
+BOOST_AUTO_TEST_SUITE(ComplexTests)
+
+// -------------------------------------------------------------------
+// Check if complex scenarios with multiple threads execute across multiple threads.
+// -------------------------------------------------------------------
+BOOST_AUTO_TEST_CASE(ExecuteJobs_ComplexScenario_SpeedComparison)
+{
+    WorkerThreads pool;
+    JobQueue globalJobQueue;
+
+    constexpr int totalJobs = 1000000;
+
+    if (std::thread::hardware_concurrency() < 3)
+    {
+        BOOST_TEST_MESSAGE("Skipping: not enough hardware threads.");
+        return;
+    }
+
+    std::vector<int> sequentialNumbers(totalJobs);
+	std::chrono::steady_clock::time_point startSequential, endSequential;
+
+	startSequential = std::chrono::steady_clock::now();
+
+    for (int i = 0; i < totalJobs; ++i) // Large Sequential execution to compare against parallel latency
+    {
+        int sum = 0;
+        for (int i = 0; i < 10000; ++i) sum += i; // simulate real work
+        sequentialNumbers[i] = sum;
+    }
+
+	endSequential = std::chrono::steady_clock::now();
+
+	std::chrono::steady_clock::time_point startParallel, endParallel;
+
+    std::atomic<size_t> nextIndex{ 0 };
+    std::vector<int> parallelNumbers(totalJobs); // pre-sized, no reallocation ever
+
+    std::function<void()> job = [&parallelNumbers, &nextIndex]() {
+        size_t idx = nextIndex.fetch_add(1, std::memory_order_relaxed);
+        int sum = 0;
+        for (int i = 0; i < 10000; ++i) sum += i; // simulate real work
+        parallelNumbers[idx] = sum;
+        };
+
+    startParallel = std::chrono::steady_clock::now();
+
+	for (int i = 0; i < totalJobs; ++i)
+	{
+		globalJobQueue.AddJobs(job);
+    };
+
+    pool.distributeJobsToLocalQueues(globalJobQueue);
+    pool.executeJobs();
+
+	endParallel = std::chrono::steady_clock::now();
+
+    long long sequentialTime = std::chrono::duration_cast<std::chrono::milliseconds>(endSequential - startSequential).count();
+	long long parallelTime = std::chrono::duration_cast<std::chrono::milliseconds>(endParallel - startParallel).count();
+	
+    BOOST_TEST(parallelNumbers.size() == totalJobs);
+	BOOST_TEST(sequentialNumbers.size() == totalJobs);
+	printf("Sequential execution time: %lld ms\n", sequentialTime);
+	printf("Parallel execution time: %lld ms\n", parallelTime);
+	// The parallel execution time should be less than the sequential execution time
+	BOOST_TEST(parallelTime < sequentialTime);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
