@@ -10,13 +10,6 @@
 class LocalJobQueue : public JobQueue
 {
 public:
-	LocalJobQueue() = default;
-	// We can't copy or move the class since it contains a mutex.
-	LocalJobQueue(const LocalJobQueue&) = delete;
-	LocalJobQueue& operator=(const LocalJobQueue&) = delete;
-	LocalJobQueue(LocalJobQueue&&) = delete;
-	LocalJobQueue& operator=(LocalJobQueue&&) = delete;
-
 	/**
 	 * @brief Process the jobs in the local queue.
 	 *
@@ -37,6 +30,16 @@ public:
 	 */
 	bool stealJobs(std::vector<std::unique_ptr<LocalJobQueue>>& threadQueues, std::function<void()>& job);
 
+	/**
+	* @brief Try to pop a job from the local queue.
+	* 
+	* Called to pop a job from the owner of a local queue and move this to a different worker threads local queue.
+	* Needs to be done here as the owner of the queue will use a mutex to move the jobs to prevent a data race
+	* 
+	* @param job The job to be moved so it can be executed in the current thread.
+	* @return True if a job was successfully popped and transferred, false otherwise.
+	*/
+	bool tryPopJob(std::function<void()>& job);
 private:
 	std::mutex mtx;
 };

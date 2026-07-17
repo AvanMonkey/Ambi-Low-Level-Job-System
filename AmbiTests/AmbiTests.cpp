@@ -7,12 +7,12 @@
 #include "../Ambi/JobQueue.h"
 #include "../Ambi/LocalJobQueue.h"
 
-void TestJob()
+static void TestJob()
 {
 	std::cout << "Hello from the Job!\n\n";
 }
 
-void TestJob2()
+static void TestJob2()
 {
 	std::cout << "I'm another Job :)\n\n";
 }
@@ -49,11 +49,11 @@ int main()
 	{
 		if (i % 3 == 0) // 3 Specifically cos if i do 2 theyll probably just take turns printing
 		{
-			globalJobQueue.AddJob(TestJob);
+			globalJobQueue.AddJobs(TestJob);
 		}
 		else 
 		{
-			globalJobQueue.AddJob(TestJob2);
+			globalJobQueue.AddJobs(TestJob2);
 		}
 	}
 

@@ -38,21 +38,31 @@ bool LocalJobQueue::stealJobs(std::vector<std::unique_ptr<LocalJobQueue>>& threa
 
 	for (int i = 0; i < threadQueues.size(); ++i)
 	{
-		if (threadQueues[i].get() == this)
+		LocalJobQueue* currentQueue = threadQueues[i].get();
+
+		if (currentQueue == this)
 		{
 			continue; // Skip the current thread's queue
 		}
 
-		std::vector<std::function<void()>>& otherJobs = threadQueues[i]->GetJobs();
+		// Try to pop a job from the other thread's queue) and steal it for this worker thread. We use a reference to the job so we can execute it in the current thread after stealing it
+		if (currentQueue->tryPopJob(job))
 		{
-			std::lock_guard<std::mutex> lock(this->mtx);
-			if (!otherJobs.empty())
-			{
-				job = std::move(otherJobs.back());
-				otherJobs.pop_back(); // Remove the job from the other thread's queue since its being stolen
-				return true; // Successfully stole a job
-			}
+			return true; // Successfully stole a job
 		}
 	}
 	return false; // Failed to steal a job
+}
+
+bool LocalJobQueue::tryPopJob(std::function<void()>& job)
+{
+	// We make sure to lock the mutex in the owner thread's queue to prevent data races.
+	std::lock_guard<std::mutex> lock(this->mtx);
+	if (!GetJobs().empty())
+	{
+		job = std::move(GetJobs().back());
+		GetJobs().pop_back();
+		return true;
+	}
+	return false;
 }
