@@ -31,10 +31,10 @@ public:
 		else
 		{
 			std::cout << "Not enough Threads to use this class";
-			throw;
+			throw _EXCEPTION_;
 		}
 
-		for (int i = 0; i < numThreads - 1; i++) // Leave one thread for the main thread to run on
+		for (int i = 0; i < numThreads; i++) // Leave one thread for the main thread to run on
 		{
 			threads.emplace_back();
 			threadsJobQueues.emplace_back(std::make_unique<LocalJobQueue>());

@@ -10,13 +10,6 @@
 class LocalJobQueue : public JobQueue
 {
 public:
-	LocalJobQueue() = default;
-	// We can't copy or move the class since it contains a mutex.
-	LocalJobQueue(const LocalJobQueue&) = delete;
-	LocalJobQueue& operator=(const LocalJobQueue&) = delete;
-	LocalJobQueue(LocalJobQueue&&) = delete;
-	LocalJobQueue& operator=(LocalJobQueue&&) = delete;
-
 	/**
 	 * @brief Process the jobs in the local queue.
 	 *
