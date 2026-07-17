@@ -31,6 +31,17 @@ public:
 	bool stealJobs(std::vector<std::unique_ptr<LocalJobQueue>>& threadQueues, std::function<void()>& job);
 
 	/**
+	* @brief Try to erase a job from the front of the local queue.
+	*
+	* Called to erase a job from the owner of a local queue and move this to the job about to be executed.
+	* Called by a worker thread to execute the front job of its job queue (FIFO).
+	*
+	* @param job The job to be moved so it can be executed in the current thread.
+	* @return True if a job was successfully erased and transferred, false otherwise.
+	*/
+	bool tryEraseJob(std::function<void()>& job);
+
+	/**
 	* @brief Try to pop a job from the local queue.
 	* 
 	* Called to pop a job from the owner of a local queue and move this to a different worker threads local queue.

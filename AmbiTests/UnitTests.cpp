@@ -2,26 +2,8 @@
 //
 // Boost.Test suite for JobQueue / LocalJobQueue / WorkerThreads.
 //
-// Written against the real .cpp implementations. Two known bugs are
-// deliberately encoded as tests that are EXPECTED TO FAIL right now:
-//
-//   1. LocalJobQueue::stealJobs() locks `this->mtx` (the thief's own
-//      mutex) instead of the victim's mutex, so concurrent steals from
-//      the same donor (or a donor popping its own front() at the same
-//      time) are unsynchronized accesses to the same std::vector.
-//      -> see ConcurrentStealAndProcess_NoDataRace (run under TSan).
-//
-//   2. WorkerThreads::executeJobs() never dispatches work onto the
-//      std::thread objects in `threads` -- it calls ProcessJobs()
-//      directly, synchronously, on the calling thread. The join loop
-//      afterwards is a no-op because those threads were never started.
-//      -> see ExecuteJobs_RunsOnWorkerThreads_NotCallingThread
-//         (documented as an expected-failure test below).
-//
-// Build (example, adjust include paths / lib names as needed):
-//   g++ -std=c++17 -pthread test_job_stealing.cpp JobQueue.cpp LocalJobQueue.cpp \
-//       -lboost_unit_test_framework -o test_job_stealing
-//
+// Tests the 'Ambi' library's job queueing and work-stealing behavior, including concurrency.
+
 #define BOOST_TEST_MODULE JobStealingTests
 #include <boost/test/included/unit_test.hpp>
 
@@ -37,16 +19,24 @@
 #include "../Ambi/LocalJobQueue.h"
 
 // -----------------------------------------------------------------------
-// JobQueue: single-threaded behavior
+//                JobQueue: single-threaded behavior
 // -----------------------------------------------------------------------
 BOOST_AUTO_TEST_SUITE(JobQueueBasicTests)
 
+
+// -------------------------------------------------------------------
+// Check that the queue is empty upon construction, and that GetJobs() returns an empty vector. This is important to ensure that the queue starts in a known state
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(StartsEmpty)
 {
     JobQueue queue;
     BOOST_TEST(queue.GetJobs().empty());
 }
 
+
+// -------------------------------------------------------------------
+// Check that jobs are actually added to a queue and that the size of the queue increases accordingly.
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(AddJob_IncreasesSize)
 {
     JobQueue queue;
@@ -58,6 +48,10 @@ BOOST_AUTO_TEST_CASE(AddJob_IncreasesSize)
     BOOST_TEST(queue.GetJobs().size() == 3u);
 }
 
+
+// -------------------------------------------------------------------
+// Check that Added jobs are callable and can be invoked later.
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(AddJob_StoresCallableThatCanBeInvoked)
 {
     JobQueue queue;
@@ -73,6 +67,10 @@ BOOST_AUTO_TEST_CASE(AddJob_StoresCallableThatCanBeInvoked)
     BOOST_TEST(callCount == 1);
 }
 
+
+// -------------------------------------------------------------------
+// Check that Jobs added are in the correct order (FIFO) when retrieved from the queue. This is important for predictable execution order, especially if jobs have dependencies or side effects.
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(AddJob_PreservesInsertionOrder)
 {
     JobQueue queue;
@@ -92,18 +90,13 @@ BOOST_AUTO_TEST_CASE(AddJob_PreservesInsertionOrder)
 BOOST_AUTO_TEST_SUITE_END()
 
 // -----------------------------------------------------------------------
-// JobQueue: concurrency
-//
-// CONFIRMED BUG: JobQueue::AddJob() is `jobQueue.push_back(job)` with no
-// locking at all -- not even the LocalJobQueue's mtx guards this path,
-// since AddJob() is defined on the base class and never overridden.
-// Concurrent producers calling AddJob() race directly on the vector's
-// internal state (size/capacity/reallocation). This test demonstrates
-// that risk; run it under ThreadSanitizer (-fsanitize=thread) to see
-// the race flagged directly rather than relying on it crashing.
+//                        JobQueue: Concurrency
 // -----------------------------------------------------------------------
 BOOST_AUTO_TEST_SUITE(JobQueueConcurrencyTests)
 
+// -------------------------------------------------------------------
+// Check that jobs added concurrently are eventually present in the queue
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(ConcurrentAddJob_AllJobsEventuallyPresent)
 {
     JobQueue queue;
@@ -133,18 +126,14 @@ BOOST_AUTO_TEST_CASE(ConcurrentAddJob_AllJobsEventuallyPresent)
 BOOST_AUTO_TEST_SUITE_END()
 
 // -----------------------------------------------------------------------
-// LocalJobQueue: stealing behavior
-//
-// Real semantics from the .cpp:
-//   - stealJobs() returns false outright if threadQueues.size() < 2.
-//   - It scans threadQueues in index order, skipping `this`, and steals
-//     from the FIRST non-empty queue it finds, popping its BACK element
-//     (LIFO from the victim's perspective).
-//   - ProcessJobs() consumes its own queue from the FRONT (FIFO), and
-//     falls back to stealJobs() once its own queue is empty.
+//                  LocalJobQueue: Stealing Behavior
 // -----------------------------------------------------------------------
 BOOST_AUTO_TEST_SUITE(LocalJobQueueTests)
 
+
+// -------------------------------------------------------------------
+// Check that jobs aren't stolen if there are fewer than two queues, even if the queue has work queued. This is because having 2 threads would mean there's only one worker thread, since the 2nd thread is the main thread, and stealing from itself is not allowed.
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(StealJobs_ReturnsFalse_WhenFewerThanTwoQueues)
 {
     std::vector<std::unique_ptr<LocalJobQueue>> queues;
@@ -155,6 +144,10 @@ BOOST_AUTO_TEST_CASE(StealJobs_ReturnsFalse_WhenFewerThanTwoQueues)
     BOOST_TEST(!queues[0]->stealJobs(queues, stolen));
 }
 
+
+// -------------------------------------------------------------------
+// Check that when every queue is empty, stealJobs() returns false and does not modify the stolen job reference.
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(StealJobs_ReturnsFalse_WhenAllOtherQueuesEmpty)
 {
     std::vector<std::unique_ptr<LocalJobQueue>> queues;
@@ -165,6 +158,10 @@ BOOST_AUTO_TEST_CASE(StealJobs_ReturnsFalse_WhenAllOtherQueuesEmpty)
     BOOST_TEST(!queues[0]->stealJobs(queues, stolen));
 }
 
+
+// -------------------------------------------------------------------
+// Check that stealing jobs pops from the back of the victim's queue
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(StealJobs_ReturnsTrue_AndPopsVictimsBack)
 {
     std::vector<std::unique_ptr<LocalJobQueue>> queues;
@@ -188,6 +185,10 @@ BOOST_AUTO_TEST_CASE(StealJobs_ReturnsTrue_AndPopsVictimsBack)
     BOOST_TEST(queues[1]->GetJobs().size() == 1u);
 }
 
+
+// -------------------------------------------------------------------
+// Check that the stealer's own queue is skipped, since why would a thread steal from itself?
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(StealJobs_SkipsSelf_EvenWhenSelfHasWork)
 {
     std::vector<std::unique_ptr<LocalJobQueue>> queues;
@@ -202,6 +203,10 @@ BOOST_AUTO_TEST_CASE(StealJobs_SkipsSelf_EvenWhenSelfHasWork)
     BOOST_TEST(queues[0]->GetJobs().size() == 1u); // untouched
 }
 
+
+// -------------------------------------------------------------------
+// Check that the queue with the earliest index is raided first, even if a later queue has more work. This is important for fairness and to avoid starvation of lower-indexed queues.
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(StealJobs_PrefersEarliestIndexWithWork)
 {
     std::vector<std::unique_ptr<LocalJobQueue>> queues;
@@ -222,6 +227,10 @@ BOOST_AUTO_TEST_CASE(StealJobs_PrefersEarliestIndexWithWork)
     BOOST_TEST(!queue3Ran);
 }
 
+
+// -------------------------------------------------------------------
+// Check that each thread executes it's own queue before attempting to steal from others, and that the order of execution is FIFO for its own queue.
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(ProcessJobs_RunsOwnQueueInFifoOrder_ThenSteals)
 {
     std::vector<std::unique_ptr<LocalJobQueue>> queues;
@@ -240,15 +249,9 @@ BOOST_AUTO_TEST_CASE(ProcessJobs_RunsOwnQueueInFifoOrder_ThenSteals)
     BOOST_TEST(queues[1]->GetJobs().empty());
 }
 
+
 // -------------------------------------------------------------------
-// KNOWN BUG: stealJobs() locks `this->mtx` instead of the victim's
-// mutex. Concurrent thieves stealing from the same donor -- or a donor
-// concurrently popping its own front() via ProcessJobs() -- race on
-// the same std::vector<std::function<void()>> without real mutual
-// exclusion. This test is a stress reproduction, best run with
-// ThreadSanitizer (-fsanitize=thread) or Helgrind to surface the race
-// directly; under a plain build it may pass "by luck" or may
-// occasionally crash/corrupt depending on timing and allocator.
+// Check that no data races occur when one thread is processing its own queue while another is attempting to steal from it.
 // -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(ConcurrentStealAndProcess_NoDataRace)
 {
@@ -291,20 +294,14 @@ BOOST_AUTO_TEST_CASE(ConcurrentStealAndProcess_NoDataRace)
 BOOST_AUTO_TEST_SUITE_END()
 
 // -----------------------------------------------------------------------
-// WorkerThreads
-//
-// Real semantics from the .cpp:
-//   - distributeJobsToLocalQueues() round-robins global jobs across
-//     `threadsJobQueues` using `i % threads.size()`, then clears the
-//     global queue.
-//   - executeJobs() currently calls ProcessJobs() directly in a loop on
-//     the calling thread -- it does NOT dispatch onto the std::thread
-//     objects in `threads`. The join loop afterwards is a no-op since
-//     those threads were never started. See the expected-failure test
-//     below for a direct check of this.
+//                            WorkerThreads
 // -----------------------------------------------------------------------
 BOOST_AUTO_TEST_SUITE(WorkerThreadsTests)
 
+
+// -------------------------------------------------------------------
+// Check that the amount of queues created matches the number of threads available on the device's thread pool (-1 for main thread). If there are not enough threads, skip the test.
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(Construction_CreatesQueuesMatchingThreadCount)
 {
     if (std::thread::hardware_concurrency() < 3)
@@ -315,18 +312,17 @@ BOOST_AUTO_TEST_CASE(Construction_CreatesQueuesMatchingThreadCount)
 
     WorkerThreads pool;
 
-    // NOTE: the constructor computes numThreads = hardware_concurrency() - 1,
-    // then loops `for (i = 0; i < numThreads - 1; i++)`, so it ends up
-    // creating (hardware_concurrency() - 2) entries, not (- 1). This
-    // reflects the code AS WRITTEN; update if that off-by-one is fixed.
     unsigned int expected = std::thread::hardware_concurrency() >= 2
-        ? std::thread::hardware_concurrency() - 2
+        ? std::thread::hardware_concurrency() - 1
         : 0;
 
     BOOST_TEST(pool.getThreads().size() == expected);
     BOOST_TEST(pool.getThreadsJobQueues().size() == expected);
 }
 
+// -------------------------------------------------------------------
+// Check that local queues are constructed and that distributeJobsToLocalQueues() distributes jobs in a round-robin fashion, and clears the global queue.
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(DistributeJobsToLocalQueues_RoundRobinsAndClearsGlobalQueue)
 {
     if (std::thread::hardware_concurrency() < 3)
@@ -367,6 +363,10 @@ BOOST_AUTO_TEST_CASE(DistributeJobsToLocalQueues_RoundRobinsAndClearsGlobalQueue
     BOOST_TEST(distributed == static_cast<size_t>(totalJobs));
 }
 
+
+// -------------------------------------------------------------------
+// Check that executeJobs() is correctly distributing jobs to the local queues of the worker threads, and emptying the global queue. This is a no-op test, since the global queue is empty, but it should not crash or touch any local queues.
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(DistributeJobsToLocalQueues_NoOp_WhenGlobalQueueEmpty)
 {
     if (std::thread::hardware_concurrency() < 3)
@@ -386,6 +386,9 @@ BOOST_AUTO_TEST_CASE(DistributeJobsToLocalQueues_NoOp_WhenGlobalQueueEmpty)
     }
 }
 
+// -------------------------------------------------------------------
+// Check that executeJobs() executes all jobs in the local queues of the worker threads
+// -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(ExecuteJobs_RunsEveryDistributedJob)
 {
     if (std::thread::hardware_concurrency() < 3)
@@ -407,20 +410,11 @@ BOOST_AUTO_TEST_CASE(ExecuteJobs_RunsEveryDistributedJob)
     pool.distributeJobsToLocalQueues(globalQueue);
     pool.executeJobs();
 
-    // This holds today even with the missing-thread-dispatch bug,
-    // because ProcessJobs() still runs synchronously on the calling
-    // thread -- the work gets done, just not in parallel.
     BOOST_TEST(ran.load() == totalJobs);
 }
 
 // -------------------------------------------------------------------
-// KNOWN BUG, expected to currently FAIL:
-// executeJobs() should hand each local queue's ProcessJobs() off to
-// its corresponding std::thread in `threads`, so jobs run on worker
-// threads distinct from the caller. Right now it calls ProcessJobs()
-// directly in the loop on the calling thread, so every job's
-// std::this_thread::get_id() equals the id of the thread that called
-// executeJobs(). Once real dispatch is added, this test should pass.
+// Check that executeJobs() actually runs on worker threads, not just on the calling thread.
 // -------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(ExecuteJobs_RunsOnWorkerThreads_NotCallingThread)
 {
@@ -450,8 +444,6 @@ BOOST_AUTO_TEST_CASE(ExecuteJobs_RunsOnWorkerThreads_NotCallingThread)
     pool.distributeJobsToLocalQueues(globalQueue);
     pool.executeJobs();
 
-    // Expected to fail until executeJobs() actually dispatches onto
-    // worker threads instead of running ProcessJobs() inline.
     BOOST_TEST(ranOnDifferentThread.load());
 }
 

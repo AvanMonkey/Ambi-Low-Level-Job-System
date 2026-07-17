@@ -27,19 +27,18 @@ void WorkerThreads::executeJobs()
 		return; // No jobs
 	}
 
-	for (int i = 0; i < threadsInUse.size(); i++)
+	// Trigger Jobs threads
+	for (size_t i = 0; i < threadsInUse.size(); i++)
 	{
-		threadsJobQueues[i]->ProcessJobs(threadsJobQueues); // We use a lamda since we need to create a new thread each time
+		threadsInUse[i] = std::thread(&LocalJobQueue::ProcessJobs, threadsJobQueues[i].get(), std::ref(threadsJobQueues));
 	}
 
+	// Join the threads when done
 	for (auto& thread : threadsInUse)
-	{
-		for (auto& threadQueue : threadsJobQueues)
+	{ 
+		if (thread.joinable())
 		{
-			if (thread.joinable())
-			{
-				thread.join(); // Join the threads when done
-			}
+			thread.join(); // Join the threads when done
 		}
 	}
 }
