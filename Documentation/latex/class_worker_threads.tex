@@ -1,0 +1,158 @@
+\doxysection{Worker\+Threads Class Reference}
+\hypertarget{class_worker_threads}{}\label{class_worker_threads}\index{WorkerThreads@{WorkerThreads}}
+
+
+Holds the number of threads available on the device\textquotesingle{}s thread pool.  
+
+
+
+
+{\ttfamily \+\#include $<$Worker\+Threads.\+h$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{class_worker_threads_a8d52265901f54adb225656441b18682d}{Worker\+Threads}} ()
+\begin{DoxyCompactList}\small\item\em Constructor for \textquotesingle{}\doxylink{class_worker_threads}{Worker\+Threads}\textquotesingle{} class. Initialises a vector containing the available worker threads available for use, and their job queues. \end{DoxyCompactList}\item 
+std::\+vector$<$ std::\+thread $>$ \& \doxymbox{\hyperlink{class_worker_threads_a822afeb8098bf4cd0840369b804c9b98}{get\+Threads}} ()
+\begin{DoxyCompactList}\small\item\em Return the vector of worker threads available for use. \end{DoxyCompactList}\item 
+std::\+vector$<$ std::\+unique\+\_\+ptr$<$ \doxymbox{\hyperlink{class_local_job_queue}{Local\+Job\+Queue}} $>$ $>$ \& \doxymbox{\hyperlink{class_worker_threads_ac65bcdf35275f13e58b958aaf2e375e6}{get\+Threads\+Job\+Queues}} ()
+\begin{DoxyCompactList}\small\item\em Return the vector of jobs. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_worker_threads_a43d8eeae623fbef3d2d5c37afd389aa9}{distribute\+Jobs\+To\+Local\+Queues}} (\doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \&global\+Job\+Queue)
+\begin{DoxyCompactList}\small\item\em Add the global jobs to the local queues of the worker threads. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_worker_threads_a78b898da52f30606edf4e0c56d91d072}{execute\+Jobs}} ()
+\begin{DoxyCompactList}\small\item\em Execute the jobs on the worker threads. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_worker_threads_afef8b7c7aa6e2792a66af55792b7245b}{steal\+Jobs\+From\+Other\+Threads}} ()
+\begin{DoxyCompactList}\small\item\em Allow worker threads to steal jobs from each other. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std::\+mutex \doxymbox{\hyperlink{class_worker_threads_a784671eab99fd0e8f8d4764142a863a5}{mutex}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Holds the number of threads available on the device\textquotesingle{}s thread pool. 
+
+Initialises a vector containing the amount of worker threads (-\/1 for the main thread) available on the device. This can then be used to assign these threads jobs and use them for other functions 
+
+Definition at line \doxymbox{\hyperlink{_worker_threads_8h_source_l00015}{15}} of file \doxymbox{\hyperlink{_worker_threads_8h_source}{Worker\+Threads.\+h}}.
+
+
+
+\label{doc-constructors}
+\Hypertarget{class_worker_threads_doc-constructors}
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_worker_threads_a8d52265901f54adb225656441b18682d}\index{WorkerThreads@{WorkerThreads}!WorkerThreads@{WorkerThreads}}
+\index{WorkerThreads@{WorkerThreads}!WorkerThreads@{WorkerThreads}}
+\doxysubsubsection{\texorpdfstring{WorkerThreads()}{WorkerThreads()}}
+{\footnotesize\ttfamily \label{class_worker_threads_a8d52265901f54adb225656441b18682d} 
+Worker\+Threads::\+\+Worker\+Threads (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Constructor for \textquotesingle{}\doxylink{class_worker_threads}{Worker\+Threads}\textquotesingle{} class. Initialises a vector containing the available worker threads available for use, and their job queues. 
+
+Threads can be used to execute jobs in parallel, for more efficient processing. 
+
+Definition at line \doxymbox{\hyperlink{_worker_threads_8h_source_l00023}{23}} of file \doxymbox{\hyperlink{_worker_threads_8h_source}{Worker\+Threads.\+h}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{class_worker_threads_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_worker_threads_a43d8eeae623fbef3d2d5c37afd389aa9}\index{WorkerThreads@{WorkerThreads}!distributeJobsToLocalQueues@{distributeJobsToLocalQueues}}
+\index{distributeJobsToLocalQueues@{distributeJobsToLocalQueues}!WorkerThreads@{WorkerThreads}}
+\doxysubsubsection{\texorpdfstring{distributeJobsToLocalQueues()}{distributeJobsToLocalQueues()}}
+{\footnotesize\ttfamily \label{class_worker_threads_a43d8eeae623fbef3d2d5c37afd389aa9} 
+void Worker\+Threads::\+distribute\+Jobs\+To\+Local\+Queues (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \&}]{global\+Job\+Queue}{}\end{DoxyParamCaption})}
+
+
+
+Add the global jobs to the local queues of the worker threads. 
+
+Self Explanatory
+
+
+\begin{DoxyParams}{Parameters}
+{\em global\+Job\+Queue} & The global job queue that contains the jobs to be distributed to the worker threads. Passed by reference since we need to access the singular job queue throughout the whole program \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line \doxymbox{\hyperlink{_worker_threads_8cpp_source_l00003}{3}} of file \doxymbox{\hyperlink{_worker_threads_8cpp_source}{Worker\+Threads.\+cpp}}.
+
+\Hypertarget{class_worker_threads_a78b898da52f30606edf4e0c56d91d072}\index{WorkerThreads@{WorkerThreads}!executeJobs@{executeJobs}}
+\index{executeJobs@{executeJobs}!WorkerThreads@{WorkerThreads}}
+\doxysubsubsection{\texorpdfstring{executeJobs()}{executeJobs()}}
+{\footnotesize\ttfamily \label{class_worker_threads_a78b898da52f30606edf4e0c56d91d072} 
+void Worker\+Threads::\+execute\+Jobs (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Execute the jobs on the worker threads. 
+
+This will execute the jobs on the worker threads, Creating a new thread for each worker thread and execute the jobs in their local queues. It will then join the threads when done. 
+
+Definition at line \doxymbox{\hyperlink{_worker_threads_8cpp_source_l00021}{21}} of file \doxymbox{\hyperlink{_worker_threads_8cpp_source}{Worker\+Threads.\+cpp}}.
+
+\Hypertarget{class_worker_threads_a822afeb8098bf4cd0840369b804c9b98}\index{WorkerThreads@{WorkerThreads}!getThreads@{getThreads}}
+\index{getThreads@{getThreads}!WorkerThreads@{WorkerThreads}}
+\doxysubsubsection{\texorpdfstring{getThreads()}{getThreads()}}
+{\footnotesize\ttfamily \label{class_worker_threads_a822afeb8098bf4cd0840369b804c9b98} 
+std::\+vector$<$ std::\+thread $>$ \& Worker\+Threads::\+get\+Threads (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Return the vector of worker threads available for use. 
+
+\textquotesingle{}threads\textquotesingle{} vector is private, so a getter is needed to access it. This allows the user to see the available worker threads and assign jobs to them as needed 
+
+Definition at line \doxymbox{\hyperlink{_worker_threads_8h_source_l00049}{49}} of file \doxymbox{\hyperlink{_worker_threads_8h_source}{Worker\+Threads.\+h}}.
+
+\Hypertarget{class_worker_threads_ac65bcdf35275f13e58b958aaf2e375e6}\index{WorkerThreads@{WorkerThreads}!getThreadsJobQueues@{getThreadsJobQueues}}
+\index{getThreadsJobQueues@{getThreadsJobQueues}!WorkerThreads@{WorkerThreads}}
+\doxysubsubsection{\texorpdfstring{getThreadsJobQueues()}{getThreadsJobQueues()}}
+{\footnotesize\ttfamily \label{class_worker_threads_ac65bcdf35275f13e58b958aaf2e375e6} 
+std::\+vector$<$ std::\+unique\+\_\+ptr$<$ \doxymbox{\hyperlink{class_local_job_queue}{Local\+Job\+Queue}} $>$ $>$ \& Worker\+Threads::\+get\+Threads\+Job\+Queues (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Return the vector of jobs. 
+
+For accessing the job queues of threads. Their index corresponds to the worker thread in the \textquotesingle{}threads\textquotesingle{} vector. 
+
+Definition at line \doxymbox{\hyperlink{_worker_threads_8h_source_l00056}{56}} of file \doxymbox{\hyperlink{_worker_threads_8h_source}{Worker\+Threads.\+h}}.
+
+\Hypertarget{class_worker_threads_afef8b7c7aa6e2792a66af55792b7245b}\index{WorkerThreads@{WorkerThreads}!stealJobsFromOtherThreads@{stealJobsFromOtherThreads}}
+\index{stealJobsFromOtherThreads@{stealJobsFromOtherThreads}!WorkerThreads@{WorkerThreads}}
+\doxysubsubsection{\texorpdfstring{stealJobsFromOtherThreads()}{stealJobsFromOtherThreads()}}
+{\footnotesize\ttfamily \label{class_worker_threads_afef8b7c7aa6e2792a66af55792b7245b} 
+void Worker\+Threads::\+steal\+Jobs\+From\+Other\+Threads (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Allow worker threads to steal jobs from each other. 
+
+This function enables work stealing between worker threads, improving overall processing efficiency. 
+
+\label{doc-variable-members}
+\Hypertarget{class_worker_threads_doc-variable-members}
+\doxysubsection{Member Data Documentation}
+\Hypertarget{class_worker_threads_a784671eab99fd0e8f8d4764142a863a5}\index{WorkerThreads@{WorkerThreads}!mutex@{mutex}}
+\index{mutex@{mutex}!WorkerThreads@{WorkerThreads}}
+\doxysubsubsection{\texorpdfstring{mutex}{mutex}}
+{\footnotesize\ttfamily \label{class_worker_threads_a784671eab99fd0e8f8d4764142a863a5} 
+std::\+mutex Worker\+Threads::\+mutex}
+
+
+
+Definition at line \doxymbox{\hyperlink{_worker_threads_8h_source_l00081}{81}} of file \doxymbox{\hyperlink{_worker_threads_8h_source}{Worker\+Threads.\+h}}.
+
+
+
+The documentation for this class was generated from the following files:\+\begin{DoxyCompactItemize}
+\item 
+Worker\+Threads.\+h\item 
+Worker\+Threads.\+cpp\end{DoxyCompactItemize}

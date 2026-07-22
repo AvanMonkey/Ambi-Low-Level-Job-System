@@ -1,0 +1,164 @@
+\doxysection{Local\+Job\+Queue Class Reference}
+\hypertarget{class_local_job_queue}{}\label{class_local_job_queue}\index{LocalJobQueue@{LocalJobQueue}}
+
+
+Local Queue for Jobs. This class is responsible for managing the local queue of jobs that will be processed by each worker thread.  
+
+
+
+
+{\ttfamily \+\#include $<$Local\+Job\+Queue.\+h$>$}
+
+Inheritance diagram for Local\+Job\+Queue:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_local_job_queue}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_local_job_queue_a4983315983e8baf9b250f481e90470f6}{Process\+Jobs}} (std::\+vector$<$ std::\+unique\+\_\+ptr$<$ \doxymbox{\hyperlink{class_local_job_queue}{Local\+Job\+Queue}} $>$ $>$ \&thread\+Queues)
+\begin{DoxyCompactList}\small\item\em Process the jobs in the local queue. \end{DoxyCompactList}\item 
+bool \doxymbox{\hyperlink{class_local_job_queue_a6f093cd3495a5545ed7cc7bad866d5bc}{steal\+Jobs}} (std::\+vector$<$ std::\+unique\+\_\+ptr$<$ \doxymbox{\hyperlink{class_local_job_queue}{Local\+Job\+Queue}} $>$ $>$ \&thread\+Queues, std::\+function$<$ void()$>$ \&job)
+\begin{DoxyCompactList}\small\item\em Steal jobs from other worker threads. \end{DoxyCompactList}\item 
+bool \doxymbox{\hyperlink{class_local_job_queue_ad64ce4b2d0a172c81680911ef201f40a}{try\+Erase\+Job}} (std::\+function$<$ void()$>$ \&job)
+\begin{DoxyCompactList}\small\item\em Try to erase a job from the front of the local queue. \end{DoxyCompactList}\item 
+bool \doxymbox{\hyperlink{class_local_job_queue_adbc77cfc7b58eec2c71991197f93cb7c}{try\+Pop\+Job}} (std::\+function$<$ void()$>$ \&job)
+\begin{DoxyCompactList}\small\item\em Try to pop a job from the local queue. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \doxymbox{\hyperlink{class_job_queue}{Job\+Queue}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Job\+Queue} (const \doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \&)=delete
+\item 
+\doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \& {\bfseries operator=} (const \doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \&)=delete
+\item 
+{\bfseries Job\+Queue} (\doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \&\&)=delete
+\item 
+\doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \& {\bfseries operator=} (\doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \&\&)=delete
+\item 
+void \doxymbox{\hyperlink{class_job_queue_a215d3237d2d9c00f79b7e2b901fe8b15}{Add\+Jobs}} (std::\+function$<$ void()$>$ job)
+\begin{DoxyCompactList}\small\item\em Jobs will vary in their bodies, so we use std::\+function to allow for any callable type to be added as a job. \end{DoxyCompactList}\item 
+std::\+deque$<$ std::\+function$<$ void()$>$ $>$ \& \doxymbox{\hyperlink{class_job_queue_a9366b9c07b604e4953b089f5bc5334aa}{Get\+Jobs}} ()
+\begin{DoxyCompactList}\small\item\em A method to retrieve the current queue of jobs. This allows worker threads to access the jobs they need to process, with a reference being returned so the user can see the current state of the queue. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Additional Inherited Members}
+\doxysubsection*{Public Attributes inherited from \doxymbox{\hyperlink{class_job_queue}{Job\+Queue}}}
+\begin{DoxyCompactItemize}
+\item 
+std::\+mutex \doxymbox{\hyperlink{class_job_queue_adf9b3f51324e42e01f6daa421c1f91f6}{mtx}}
+\begin{DoxyCompactList}\small\item\em Mutex for synchronizing access to shared resources. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Local Queue for Jobs. This class is responsible for managing the local queue of jobs that will be processed by each worker thread. 
+
+Holds the Jobs that need to be processed by each worker thread. The \doxylink{class_local_job_queue}{Local\+Job\+Queue} class provides methods to add jobs to the local queue and process the jobs in the local queue. 
+
+Definition at line \doxymbox{\hyperlink{_local_job_queue_8h_source_l00010}{10}} of file \doxymbox{\hyperlink{_local_job_queue_8h_source}{Local\+Job\+Queue.\+h}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{class_local_job_queue_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_local_job_queue_a4983315983e8baf9b250f481e90470f6}\index{LocalJobQueue@{LocalJobQueue}!ProcessJobs@{ProcessJobs}}
+\index{ProcessJobs@{ProcessJobs}!LocalJobQueue@{LocalJobQueue}}
+\doxysubsubsection{\texorpdfstring{ProcessJobs()}{ProcessJobs()}}
+{\footnotesize\ttfamily \label{class_local_job_queue_a4983315983e8baf9b250f481e90470f6} 
+void Local\+Job\+Queue::\+\+Process\+Jobs (\begin{DoxyParamCaption}\item[{std::\+vector$<$ std::\+unique\+\_\+ptr$<$ \doxymbox{\hyperlink{class_local_job_queue}{Local\+Job\+Queue}} $>$ $>$ \&}]{thread\+Queues}{}\end{DoxyParamCaption})}
+
+
+
+Process the jobs in the local queue. 
+
+Process the jobs in the local queue. This will be used by each worker thread to process the jobs that are assigned to it, and later on, will steal jobs from other workers.
+
+
+\begin{DoxyParams}{Parameters}
+{\em thread\+Queues} & The vector of local job queues for each worker thread. To be passed to the \textquotesingle{}steal\+Jobs\textquotesingle{} function to allow for job stealing between threads. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line \doxymbox{\hyperlink{_local_job_queue_8cpp_source_l00004}{4}} of file \doxymbox{\hyperlink{_local_job_queue_8cpp_source}{Local\+Job\+Queue.\+cpp}}.
+
+\Hypertarget{class_local_job_queue_a6f093cd3495a5545ed7cc7bad866d5bc}\index{LocalJobQueue@{LocalJobQueue}!stealJobs@{stealJobs}}
+\index{stealJobs@{stealJobs}!LocalJobQueue@{LocalJobQueue}}
+\doxysubsubsection{\texorpdfstring{stealJobs()}{stealJobs()}}
+{\footnotesize\ttfamily \label{class_local_job_queue_a6f093cd3495a5545ed7cc7bad866d5bc} 
+bool Local\+Job\+Queue::\+steal\+Jobs (\begin{DoxyParamCaption}\item[{std::\+vector$<$ std::\+unique\+\_\+ptr$<$ \doxymbox{\hyperlink{class_local_job_queue}{Local\+Job\+Queue}} $>$ $>$ \&}]{thread\+Queues}{, }\item[{std::\+function$<$ void()$>$ \&}]{job}{}\end{DoxyParamCaption})}
+
+
+
+Steal jobs from other worker threads. 
+
+Steal jobs from other worker threads\textquotesingle{} local job queues. This is used to balance the load between threads.
+
+
+\begin{DoxyParams}{Parameters}
+{\em thread\+Queues} & The vector of local job queues for each worker thread. \\
+\hline
+{\em job} & The job to be stolen. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if a job was successfully stolen, false otherwise. 
+\end{DoxyReturn}
+
+
+Definition at line \doxymbox{\hyperlink{_local_job_queue_8cpp_source_l00040}{40}} of file \doxymbox{\hyperlink{_local_job_queue_8cpp_source}{Local\+Job\+Queue.\+cpp}}.
+
+\Hypertarget{class_local_job_queue_ad64ce4b2d0a172c81680911ef201f40a}\index{LocalJobQueue@{LocalJobQueue}!tryEraseJob@{tryEraseJob}}
+\index{tryEraseJob@{tryEraseJob}!LocalJobQueue@{LocalJobQueue}}
+\doxysubsubsection{\texorpdfstring{tryEraseJob()}{tryEraseJob()}}
+{\footnotesize\ttfamily \label{class_local_job_queue_ad64ce4b2d0a172c81680911ef201f40a} 
+bool Local\+Job\+Queue::\+try\+Erase\+Job (\begin{DoxyParamCaption}\item[{std::\+function$<$ void()$>$ \&}]{job}{}\end{DoxyParamCaption})}
+
+
+
+Try to erase a job from the front of the local queue. 
+
+Called to erase a job from the owner of a local queue and move this to the job about to be executed. Called by a worker thread to execute the front job of its job queue (FIFO).
+
+
+\begin{DoxyParams}{Parameters}
+{\em job} & The job to be moved so it can be executed in the current thread. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if a job was successfully erased and transferred, false otherwise. 
+\end{DoxyReturn}
+
+
+Definition at line \doxymbox{\hyperlink{_local_job_queue_8cpp_source_l00067}{67}} of file \doxymbox{\hyperlink{_local_job_queue_8cpp_source}{Local\+Job\+Queue.\+cpp}}.
+
+\Hypertarget{class_local_job_queue_adbc77cfc7b58eec2c71991197f93cb7c}\index{LocalJobQueue@{LocalJobQueue}!tryPopJob@{tryPopJob}}
+\index{tryPopJob@{tryPopJob}!LocalJobQueue@{LocalJobQueue}}
+\doxysubsubsection{\texorpdfstring{tryPopJob()}{tryPopJob()}}
+{\footnotesize\ttfamily \label{class_local_job_queue_adbc77cfc7b58eec2c71991197f93cb7c} 
+bool Local\+Job\+Queue::\+try\+Pop\+Job (\begin{DoxyParamCaption}\item[{std::\+function$<$ void()$>$ \&}]{job}{}\end{DoxyParamCaption})}
+
+
+
+Try to pop a job from the local queue. 
+
+Called to pop a job from the owner of a local queue and move this to a different worker threads local queue. Needs to be done here as the owner of the queue will use a mutex to move the jobs to prevent a data race
+
+
+\begin{DoxyParams}{Parameters}
+{\em job} & The job to be moved so it can be executed in the current thread. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if a job was successfully popped and transferred, false otherwise. 
+\end{DoxyReturn}
+
+
+Definition at line \doxymbox{\hyperlink{_local_job_queue_8cpp_source_l00079}{79}} of file \doxymbox{\hyperlink{_local_job_queue_8cpp_source}{Local\+Job\+Queue.\+cpp}}.
+
+
+
+The documentation for this class was generated from the following files:\+\begin{DoxyCompactItemize}
+\item 
+Local\+Job\+Queue.\+h\item 
+Local\+Job\+Queue.\+cpp\end{DoxyCompactItemize}

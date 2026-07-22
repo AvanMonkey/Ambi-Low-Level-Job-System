@@ -1,0 +1,53 @@
+\doxysection{Worker\+Threads.\+h}
+\hypertarget{_worker_threads_8h_source}{}\label{_worker_threads_8h_source}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00001}00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00002}00002\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00003}00003\ \textcolor{preprocessor}{\#include\ <thread>}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00004}00004\ \textcolor{preprocessor}{\#include\ "{}LocalJobQueue.h"{}}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00005}00005\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00006}00006\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00015}\doxymbox{\hyperlink{class_worker_threads}{00015}}\ \textcolor{keyword}{class\ }\doxymbox{\hyperlink{class_worker_threads_a8d52265901f54adb225656441b18682d}{WorkerThreads}}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00016}00016\ \{}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00017}00017\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00023}\doxymbox{\hyperlink{class_worker_threads_a8d52265901f54adb225656441b18682d}{00023}}\ \ \ \ \ \doxymbox{\hyperlink{class_worker_threads_a8d52265901f54adb225656441b18682d}{WorkerThreads}}()\ \{}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00024}00024\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ numThreads\ =\ 0;}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00026}00026\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (std::thread::hardware\_concurrency()\ !=\ 0)}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00027}00027\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00028}00028\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ See\ the\ number\ of\ threads\ available\ on\ the\ device's\ thread\ pool\ (-\/1\ for\ main\ thread).}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00029}00029\ \ \ \ \ \ \ \ \ \ \ \ \ numThreads\ =\ std::thread::hardware\_concurrency()\ -\/\ 1;}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00030}00030\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00031}00031\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00032}00032\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00033}00033\ \ \ \ \ \ \ \ \ \ \ \ \ std::cout\ <<\ \textcolor{stringliteral}{"{}Not\ enough\ Threads\ to\ use\ this\ class"{}};}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00034}00034\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{throw}\ \_EXCEPTION\_;}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00035}00035\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00037}00037\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ numThreads;\ i++)\ \textcolor{comment}{//\ Leave\ one\ thread\ for\ the\ main\ thread\ to\ run\ on}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00038}00038\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ threads.emplace\_back();}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00040}00040\ \ \ \ \ \ \ \ \ \ \ \ \ threadsJobQueues.emplace\_back(std::make\_unique<LocalJobQueue>());}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00041}00041\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00042}00042\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00049}\doxymbox{\hyperlink{class_worker_threads_a822afeb8098bf4cd0840369b804c9b98}{00049}}\ \ \ \ \ std::vector<std::thread>\&\ \doxymbox{\hyperlink{class_worker_threads_a822afeb8098bf4cd0840369b804c9b98}{getThreads}}()\ \{\ \textcolor{keywordflow}{return}\ threads;\ \};}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00056}\doxymbox{\hyperlink{class_worker_threads_ac65bcdf35275f13e58b958aaf2e375e6}{00056}}\ \ \ \ \ std::vector<std::unique\_ptr<LocalJobQueue>>\&\ \doxymbox{\hyperlink{class_worker_threads_ac65bcdf35275f13e58b958aaf2e375e6}{getThreadsJobQueues}}()\ \{\ \textcolor{keywordflow}{return}\ threadsJobQueues;\ \};}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00057}00057\ }
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00065}00065\ \ \ \ \ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{class_worker_threads_a43d8eeae623fbef3d2d5c37afd389aa9}{distributeJobsToLocalQueues}}(\doxymbox{\hyperlink{class_job_queue}{JobQueue}}\&\ globalJobQueue);}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00072}00072\ \ \ \ \ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{class_worker_threads_a78b898da52f30606edf4e0c56d91d072}{executeJobs}}();}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00073}00073\ }
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00079}\doxymbox{\hyperlink{class_worker_threads_afef8b7c7aa6e2792a66af55792b7245b}{00079}}\ \ \ \ \ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{class_worker_threads_afef8b7c7aa6e2792a66af55792b7245b}{stealJobsFromOtherThreads}}();\ }
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00081}00081\ \ \ \ \ std::mutex\ mutex;\ \textcolor{comment}{//\ Mutex\ for\ synchronizing\ access\ to\ shared\ resources,\ ensuring\ thread\ safety\ during\ job\ distribution\ and\ execution}}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00082}00082\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00083}00083\ }
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00088}00088\ \ \ \ \ std::vector<std::thread>\ threads;}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00089}00089\ }
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00094}00094\ \ \ \ \ std::vector<std::unique\_ptr<LocalJobQueue>>\ threadsJobQueues;}
+\DoxyCodeLine{\Hypertarget{_worker_threads_8h_source_l00095}00095\ \};}
+
+\end{DoxyCode}

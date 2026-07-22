@@ -1,0 +1,95 @@
+\doxysection{Local\+Job\+Queue.\+cpp}
+\hypertarget{_local_job_queue_8cpp_source}{}\label{_local_job_queue_8cpp_source}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00001}00001\ \textcolor{preprocessor}{\#include\ "{}LocalJobQueue.h"{}}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00002}00002\ \textcolor{preprocessor}{\#include\ <thread>}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00003}00003\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00004}\doxymbox{\hyperlink{class_local_job_queue_a4983315983e8baf9b250f481e90470f6}{00004}}\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{class_local_job_queue_a4983315983e8baf9b250f481e90470f6}{LocalJobQueue::ProcessJobs}}(std::vector<std::unique\_ptr<LocalJobQueue>>\&\ threadQueues)}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00005}00005\ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00006}00006\ \ \ \ \ \textcolor{keywordflow}{while}\ (\textcolor{keyword}{true})}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00007}00007\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00008}00008\ \ \ \ \ \ \ \ \ std::function<void()>\ job;}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00009}00009\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00010}00010\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Execute\ the\ jobs\ in\ this\ Local\ Job\ Queue}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00011}00011\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\doxymbox{\hyperlink{class_local_job_queue_ad64ce4b2d0a172c81680911ef201f40a}{tryEraseJob}}(job))}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00012}00012\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00013}00013\ \ \ \ \ \ \ \ \ \ \ \ \ job();\ \textcolor{comment}{//\ Deal\ with\ it\ now\ so\ we\ dont\ accidentally\ overwrite\ it\ when\ we\ steal\ a\ job\ from\ another\ thread}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00014}00014\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00015}00015\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00016}00016\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00017}00017\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isJobQueueEmpty;}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00018}00018\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00019}00019\ \ \ \ \ \ \ \ \ \ \ \ \ std::lock\_guard<std::mutex>\ lock(this-\/>mtx);}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00020}00020\ \ \ \ \ \ \ \ \ \ \ \ \ isJobQueueEmpty\ =\ \doxymbox{\hyperlink{class_job_queue_a9366b9c07b604e4953b089f5bc5334aa}{GetJobs}}().empty();}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00021}00021\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00022}00022\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00023}00023\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!isJobQueueEmpty)}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00024}00024\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00025}00025\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00026}00026\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00027}00027\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00028}00028\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Try\ stealing\ if\ conditions\ are\ met}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00029}00029\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\doxymbox{\hyperlink{class_local_job_queue_a6f093cd3495a5545ed7cc7bad866d5bc}{stealJobs}}(threadQueues,\ job))}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00030}00030\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00031}00031\ \ \ \ \ \ \ \ \ \ \ \ \ job();\ \textcolor{comment}{//\ Job\ will\ be\ changed\ to\ the\ stolen\ job\ in\ the\ 'stealJobs'\ function,\ so\ we\ can\ execute\ it\ here}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00032}00032\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00033}00033\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00034}00034\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00035}00035\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};\ \textcolor{comment}{//\ No\ more\ jobs\ to\ process\ and\ no\ jobs\ to\ steal}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00036}00036\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00037}00037\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00038}00038\ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00039}00039\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00040}\doxymbox{\hyperlink{class_local_job_queue_a6f093cd3495a5545ed7cc7bad866d5bc}{00040}}\ \textcolor{keywordtype}{bool}\ \doxymbox{\hyperlink{class_local_job_queue_a6f093cd3495a5545ed7cc7bad866d5bc}{LocalJobQueue::stealJobs}}(std::vector<std::unique\_ptr<LocalJobQueue>>\&\ threadQueues,\ std::function<\textcolor{keywordtype}{void}()>\&\ job)}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00041}00041\ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00042}00042\ \ \ \ \ \textcolor{comment}{//\ Need\ atleast\ 2\ worker\ threads\ present\ if\ we\ wanna\ steal\ jobs,\ since\ 1\ worker\ thread\ obviously\ cant\ steal\ from\ itself.\ The\ main\ thread\ is\ not\ a\ worker\ thread\ so\ isn't\ taken\ into\ account\ here.}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00043}00043\ \ \ \ \ \textcolor{keywordflow}{if}\ (threadQueues.size()\ <\ 2)}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00044}00044\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00045}00045\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ \textcolor{comment}{//\ No\ other\ threads\ to\ steal\ from}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00046}00046\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00047}00047\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00048}00048\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ threadQueues.size();\ ++i)}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00049}00049\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00050}00050\ \ \ \ \ \ \ \ \ \doxymbox{\hyperlink{class_local_job_queue}{LocalJobQueue}}*\ currentQueue\ =\ threadQueues[i].get();}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00051}00051\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00052}00052\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (currentQueue\ ==\ \textcolor{keyword}{this})}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00053}00053\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00054}00054\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};\ \textcolor{comment}{//\ Skip\ the\ current\ thread's\ queue}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00055}00055\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00056}00056\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00057}00057\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Try\ to\ pop\ a\ job\ from\ the\ other\ thread's\ queue)\ and\ steal\ it\ for\ this\ worker\ thread.\ We\ use\ a\ reference\ to\ the\ job\ so\ we\ can\ execute\ it\ in\ the\ current\ thread\ after\ stealing\ it}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00058}00058\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (currentQueue-\/>\doxymbox{\hyperlink{class_local_job_queue_adbc77cfc7b58eec2c71991197f93cb7c}{tryPopJob}}(job))}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00059}00059\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};\ \textcolor{comment}{//\ Successfully\ stole\ a\ job}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00061}00061\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00062}00062\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00063}00063\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};\ \textcolor{comment}{//\ Failed\ to\ steal\ a\ job}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00064}00064\ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00065}00065\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00066}00066\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00067}\doxymbox{\hyperlink{class_local_job_queue_ad64ce4b2d0a172c81680911ef201f40a}{00067}}\ \textcolor{keywordtype}{bool}\ \doxymbox{\hyperlink{class_local_job_queue_ad64ce4b2d0a172c81680911ef201f40a}{LocalJobQueue::tryEraseJob}}(std::function<\textcolor{keywordtype}{void}()>\&\ job)}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00068}00068\ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00069}00069\ \ \ \ \ std::lock\_guard<std::mutex>\ lock(this-\/>mtx);}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00070}00070\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\doxymbox{\hyperlink{class_job_queue_a9366b9c07b604e4953b089f5bc5334aa}{GetJobs}}().empty())}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00071}00071\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00072}00072\ \ \ \ \ \ \ \ \ job\ =\ std::move(\doxymbox{\hyperlink{class_job_queue_a9366b9c07b604e4953b089f5bc5334aa}{GetJobs}}().front());\ \textcolor{comment}{//\ (FIFO)}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00073}00073\ \ \ \ \ \ \ \ \ \doxymbox{\hyperlink{class_job_queue_a9366b9c07b604e4953b089f5bc5334aa}{GetJobs}}().pop\_front();\ \textcolor{comment}{//\ Remove\ the\ job\ from\ the\ Job\ queue\ since\ its\ being\ executed}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00074}00074\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00075}00075\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00076}00076\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00077}00077\ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00078}00078\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00079}\doxymbox{\hyperlink{class_local_job_queue_adbc77cfc7b58eec2c71991197f93cb7c}{00079}}\ \textcolor{keywordtype}{bool}\ \doxymbox{\hyperlink{class_local_job_queue_adbc77cfc7b58eec2c71991197f93cb7c}{LocalJobQueue::tryPopJob}}(std::function<\textcolor{keywordtype}{void}()>\&\ job)}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00080}00080\ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00081}00081\ \ \ \ \ \textcolor{comment}{//\ We\ make\ sure\ to\ lock\ the\ mutex\ in\ the\ owner\ thread's\ queue\ to\ prevent\ data\ races.}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00082}00082\ \ \ \ \ std::lock\_guard<std::mutex>\ lock(this-\/>mtx);}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00083}00083\ \ \ \ \ \textcolor{keywordflow}{if}\ (!\doxymbox{\hyperlink{class_job_queue_a9366b9c07b604e4953b089f5bc5334aa}{GetJobs}}().empty())}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00084}00084\ \ \ \ \ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00085}00085\ \ \ \ \ \ \ \ \ job\ =\ std::move(\doxymbox{\hyperlink{class_job_queue_a9366b9c07b604e4953b089f5bc5334aa}{GetJobs}}().back());\ \textcolor{comment}{//\ (LIFO)}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00086}00086\ \ \ \ \ \ \ \ \ \doxymbox{\hyperlink{class_job_queue_a9366b9c07b604e4953b089f5bc5334aa}{GetJobs}}().pop\_back();\ \textcolor{comment}{//\ Remove\ the\ job\ from\ the\ back\ of\ the\ Job\ queue\ since\ its\ being\ stolen}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00087}00087\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00088}00088\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00089}00089\ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8cpp_source_l00090}00090\ \}}
+
+\end{DoxyCode}

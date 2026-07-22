@@ -1,0 +1,12 @@
+\doxysection{Job\+Queue.\+cpp}
+\hypertarget{_job_queue_8cpp_source}{}\label{_job_queue_8cpp_source}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{_job_queue_8cpp_source_l00001}00001\ \textcolor{preprocessor}{\#include\ "{}JobQueue.h"{}}}
+\DoxyCodeLine{\Hypertarget{_job_queue_8cpp_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{_job_queue_8cpp_source_l00003}\doxymbox{\hyperlink{class_job_queue_a215d3237d2d9c00f79b7e2b901fe8b15}{00003}}\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{class_job_queue_a215d3237d2d9c00f79b7e2b901fe8b15}{JobQueue::AddJobs}}(std::function<\textcolor{keywordtype}{void}()>\ job)}
+\DoxyCodeLine{\Hypertarget{_job_queue_8cpp_source_l00004}00004\ \{}
+\DoxyCodeLine{\Hypertarget{_job_queue_8cpp_source_l00005}00005\ \ \ \ \ std::lock\_guard<std::mutex>\ lock(\doxymbox{\hyperlink{class_job_queue_adf9b3f51324e42e01f6daa421c1f91f6}{mtx}});}
+\DoxyCodeLine{\Hypertarget{_job_queue_8cpp_source_l00006}00006\ \ \ \ \ jobQueue.push\_back(job);\ \ \ \ \textcolor{comment}{//\ Add\ the\ job\ to\ the\ queue.}}
+\DoxyCodeLine{\Hypertarget{_job_queue_8cpp_source_l00007}00007\ \}}
+
+\end{DoxyCode}

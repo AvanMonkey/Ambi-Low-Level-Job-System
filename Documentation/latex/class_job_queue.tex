@@ -1,0 +1,116 @@
+\doxysection{Job\+Queue Class Reference}
+\hypertarget{class_job_queue}{}\label{class_job_queue}\index{JobQueue@{JobQueue}}
+
+
+Global Queue for Jobs. This class is responsible for managing the global queue of jobs that will be distributed to worker threads.  
+
+
+
+
+{\ttfamily \+\#include $<$Job\+Queue.\+h$>$}
+
+Inheritance diagram for Job\+Queue:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_job_queue}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_job_queue_a14042d9082e1c93c45295418386cc1e9}\label{class_job_queue_a14042d9082e1c93c45295418386cc1e9} 
+{\bfseries Job\+Queue} (const \doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \&)=delete
+\item 
+\Hypertarget{class_job_queue_a758604671f152362d072fa04cd027171}\label{class_job_queue_a758604671f152362d072fa04cd027171} 
+\doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \& {\bfseries operator=} (const \doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \&)=delete
+\item 
+\Hypertarget{class_job_queue_a3054212dca513034c0fd2b73455bb448}\label{class_job_queue_a3054212dca513034c0fd2b73455bb448} 
+{\bfseries Job\+Queue} (\doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \&\&)=delete
+\item 
+\Hypertarget{class_job_queue_a2fa457d4e2373411581f5a2dbbe9f3ba}\label{class_job_queue_a2fa457d4e2373411581f5a2dbbe9f3ba} 
+\doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \& {\bfseries operator=} (\doxymbox{\hyperlink{class_job_queue}{Job\+Queue}} \&\&)=delete
+\item 
+void \doxymbox{\hyperlink{class_job_queue_a215d3237d2d9c00f79b7e2b901fe8b15}{Add\+Jobs}} (std::\+function$<$ void()$>$ job)
+\begin{DoxyCompactList}\small\item\em Jobs will vary in their bodies, so we use std::\+function to allow for any callable type to be added as a job. \end{DoxyCompactList}\item 
+std::\+deque$<$ std::\+function$<$ void()$>$ $>$ \& \doxymbox{\hyperlink{class_job_queue_a9366b9c07b604e4953b089f5bc5334aa}{Get\+Jobs}} ()
+\begin{DoxyCompactList}\small\item\em A method to retrieve the current queue of jobs. This allows worker threads to access the jobs they need to process, with a reference being returned so the user can see the current state of the queue. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std::\+mutex \doxymbox{\hyperlink{class_job_queue_adf9b3f51324e42e01f6daa421c1f91f6}{mtx}}
+\begin{DoxyCompactList}\small\item\em Mutex for synchronizing access to shared resources. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Global Queue for Jobs. This class is responsible for managing the global queue of jobs that will be distributed to worker threads. 
+
+Contains the Jobs that need to be processed by the worker threads. The \doxylink{class_job_queue}{Job\+Queue} class provides methods to add jobs to the queue and retrieve the current queue of jobs. 
+
+Definition at line \doxymbox{\hyperlink{_job_queue_8h_source_l00012}{12}} of file \doxymbox{\hyperlink{_job_queue_8h_source}{Job\+Queue.\+h}}.
+
+
+
+\label{doc-func-members}
+\Hypertarget{class_job_queue_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_job_queue_a215d3237d2d9c00f79b7e2b901fe8b15}\index{JobQueue@{JobQueue}!AddJobs@{AddJobs}}
+\index{AddJobs@{AddJobs}!JobQueue@{JobQueue}}
+\doxysubsubsection{\texorpdfstring{AddJobs()}{AddJobs()}}
+{\footnotesize\ttfamily \label{class_job_queue_a215d3237d2d9c00f79b7e2b901fe8b15} 
+void Job\+Queue::\+\+Add\+Jobs (\begin{DoxyParamCaption}\item[{std::\+function$<$ void()$>$}]{job}{}\end{DoxyParamCaption})}
+
+
+
+Jobs will vary in their bodies, so we use std::\+function to allow for any callable type to be added as a job. 
+
+Add Jobs to the queue. This queue will later be distributed across each available worker thread. This will obviously depend on the implementation of the thread pool and worker threads, but the idea is that each worker thread will pull jobs from this queue and execute them. 
+\begin{DoxyParams}{Parameters}
+{\em job} & The Job to be added to the queue. This is a std::\+function that represents any callable type, allowing for flexibility in the types of jobs that can be added to the queue \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line \doxymbox{\hyperlink{_job_queue_8cpp_source_l00003}{3}} of file \doxymbox{\hyperlink{_job_queue_8cpp_source}{Job\+Queue.\+cpp}}.
+
+\Hypertarget{class_job_queue_a9366b9c07b604e4953b089f5bc5334aa}\index{JobQueue@{JobQueue}!GetJobs@{GetJobs}}
+\index{GetJobs@{GetJobs}!JobQueue@{JobQueue}}
+\doxysubsubsection{\texorpdfstring{GetJobs()}{GetJobs()}}
+{\footnotesize\ttfamily \label{class_job_queue_a9366b9c07b604e4953b089f5bc5334aa} 
+std::\+deque$<$ std::\+function$<$ void()$>$ $>$ \& Job\+Queue::\+\+Get\+Jobs (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+A method to retrieve the current queue of jobs. This allows worker threads to access the jobs they need to process, with a reference being returned so the user can see the current state of the queue. 
+
+Return the current global queue of jobs to be used in the program. This allows worker threads to access the jobs they need to process, with a reference being returned so the user can see the current state of the queue. The developer cannot edit the queue directly, but they can see the current state of the queue and how many jobs are currently in it. This is useful for debugging and monitoring the job queue. \begin{DoxyReturn}{Returns}
+The Global Job Queue 
+\end{DoxyReturn}
+
+
+Definition at line \doxymbox{\hyperlink{_job_queue_8h_source_l00038}{38}} of file \doxymbox{\hyperlink{_job_queue_8h_source}{Job\+Queue.\+h}}.
+
+
+
+\label{doc-variable-members}
+\Hypertarget{class_job_queue_doc-variable-members}
+\doxysubsection{Member Data Documentation}
+\Hypertarget{class_job_queue_adf9b3f51324e42e01f6daa421c1f91f6}\index{JobQueue@{JobQueue}!mtx@{mtx}}
+\index{mtx@{mtx}!JobQueue@{JobQueue}}
+\doxysubsubsection{\texorpdfstring{mtx}{mtx}}
+{\footnotesize\ttfamily \label{class_job_queue_adf9b3f51324e42e01f6daa421c1f91f6} 
+std::\+mutex Job\+Queue::\+mtx}
+
+
+
+Mutex for synchronizing access to shared resources. 
+
+Ensures thread safety during job distribution and execution, preventing data races within the \textquotesingle{}\doxylink{class_local_job_queue}{Local\+Job\+Queue}\textquotesingle{} class. 
+
+Definition at line \doxymbox{\hyperlink{_job_queue_8h_source_l00045}{45}} of file \doxymbox{\hyperlink{_job_queue_8h_source}{Job\+Queue.\+h}}.
+
+
+
+The documentation for this class was generated from the following files:\+\begin{DoxyCompactItemize}
+\item 
+Job\+Queue.\+h\item 
+Job\+Queue.\+cpp\end{DoxyCompactItemize}

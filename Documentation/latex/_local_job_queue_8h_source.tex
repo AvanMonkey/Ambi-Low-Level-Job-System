@@ -1,0 +1,21 @@
+\doxysection{Local\+Job\+Queue.\+h}
+\hypertarget{_local_job_queue_8h_source}{}\label{_local_job_queue_8h_source}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00001}00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00002}00002\ \textcolor{preprocessor}{\#include\ "{}JobQueue.h"{}}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00003}00003\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00010}\doxymbox{\hyperlink{class_local_job_queue}{00010}}\ \textcolor{keyword}{class\ }\doxymbox{\hyperlink{class_local_job_queue}{LocalJobQueue}}\ :\ \textcolor{keyword}{public}\ JobQueue}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00011}00011\ \{}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00012}00012\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00020}00020\ \ \ \ \ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{class_local_job_queue_a4983315983e8baf9b250f481e90470f6}{ProcessJobs}}(std::vector<std::unique\_ptr<LocalJobQueue>>\&\ threadQueues);}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00031}00031\ \ \ \ \ \textcolor{keywordtype}{bool}\ \doxymbox{\hyperlink{class_local_job_queue_a6f093cd3495a5545ed7cc7bad866d5bc}{stealJobs}}(std::vector<std::unique\_ptr<LocalJobQueue>>\&\ threadQueues,\ std::function<\textcolor{keywordtype}{void}()>\&\ job);}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00042}00042\ \ \ \ \ \textcolor{keywordtype}{bool}\ \doxymbox{\hyperlink{class_local_job_queue_ad64ce4b2d0a172c81680911ef201f40a}{tryEraseJob}}(std::function<\textcolor{keywordtype}{void}()>\&\ job);}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00043}00043\ }
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00053}00053\ \ \ \ \ \textcolor{keywordtype}{bool}\ \doxymbox{\hyperlink{class_local_job_queue_adbc77cfc7b58eec2c71991197f93cb7c}{tryPopJob}}(std::function<\textcolor{keywordtype}{void}()>\&\ job);}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00054}00054\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00055}00055\ \ \ \ \ std::mutex\ mtx;}
+\DoxyCodeLine{\Hypertarget{_local_job_queue_8h_source_l00056}00056\ \};}
+
+\end{DoxyCode}
