@@ -7,12 +7,12 @@
 #include "../Ambi/JobQueue.h"
 #include "../Ambi/LocalJobQueue.h"
 
-void TestJob()
+static void TestJob()
 {
 	std::cout << "Hello from the Job!\n\n";
 }
 
-void TestJob2()
+static void TestJob2()
 {
 	std::cout << "I'm another Job :)\n\n";
 }
@@ -23,7 +23,7 @@ int main()
 	WorkerThreads workerThreads;
 	// Get the vectors by reference since there should only be one instance of the worker threads and their job queues. We also need to access them throughout the whole program
 	std::vector<std::thread>& threads = workerThreads.getThreads();
-	std::vector<LocalJobQueue>& threadsJobQueues = workerThreads.getThreadsJobQueues();
+	std::vector<std::unique_ptr<LocalJobQueue>>& threadsJobQueues = workerThreads.getThreadsJobQueues();
 
 	// Testing a bunch of random number of jobs
 	std::random_device rd;
@@ -33,14 +33,14 @@ int main()
 	std::uniform_int_distribution<int> dist(min, max);
 	int numThreads = 0;
 
-	if (std::thread::hardware_concurrency() != 0)
+	if (std::thread::hardware_concurrency() > 1)
 	{
 		// See the number of threads available on the device's thread pool (-1 for main thread).
 		numThreads = std::thread::hardware_concurrency() - 1;
 	}
 	else
 	{
-		std::cout << "Not enough Threads to use this class";
+		std::cout << "Not enough Threads to use this library";
 		throw;
 	}
 
@@ -49,11 +49,11 @@ int main()
 	{
 		if (i % 3 == 0) // 3 Specifically cos if i do 2 theyll probably just take turns printing
 		{
-			globalJobQueue.AddJob(TestJob);
+			globalJobQueue.AddJobs(TestJob);
 		}
 		else 
 		{
-			globalJobQueue.AddJob(TestJob2);
+			globalJobQueue.AddJobs(TestJob2);
 		}
 	}
 

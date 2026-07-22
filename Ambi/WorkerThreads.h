@@ -3,6 +3,7 @@
 #include <thread>
 #include "LocalJobQueue.h"
 #include <iostream>
+#include <mutex>
 
 /**
 * @class WorkerThreads
@@ -30,13 +31,13 @@ public:
 		else
 		{
 			std::cout << "Not enough Threads to use this class";
-			throw;
+			throw _EXCEPTION_;
 		}
 
-		for (int i = 0; i < numThreads - 1; i++) // Leave one thread for the main thread to run on
+		for (int i = 0; i < numThreads; i++) // Leave one thread for the main thread to run on
 		{
 			threads.emplace_back();
-			threadsJobQueues.emplace_back();
+			threadsJobQueues.emplace_back(std::make_unique<LocalJobQueue>());
 		}
 	}
 
@@ -52,7 +53,7 @@ public:
 	 *
 	 * For accessing the job queues of threads. Their index corresponds to the worker thread in the 'threads' vector.
 	*/
-	std::vector<LocalJobQueue>& getThreadsJobQueues() { return threadsJobQueues; };
+	std::vector<std::unique_ptr<LocalJobQueue>>& getThreadsJobQueues() { return threadsJobQueues; };
 
 	/**
 	* @brief Add the global jobs to the local queues of the worker threads.
@@ -69,6 +70,15 @@ public:
 	 * This will execute the jobs on the worker threads, Creating a new thread for each worker thread and execute the jobs in their local queues. It will then join the threads when done.
 	*/
 	void executeJobs();
+
+	/**
+	* @brief Allow worker threads to steal jobs from each other.
+	*
+	* This function enables work stealing between worker threads, improving overall processing efficiency.
+	*/
+	void stealJobsFromOtherThreads(); 
+
+	std::mutex mutex; // Mutex for synchronizing access to shared resources, ensuring thread safety during job distribution and execution
 private:
 
 	/**
@@ -81,5 +91,5 @@ private:
 	 * @brief Vector containing each worker thread's local job queue.
 	 * Initilaised in the constructor. This allows each worker thread to have its own queue of jobs to process, and later on, will allow for work stealing between threads.
 	*/
-	std::vector<LocalJobQueue> threadsJobQueues;
+	std::vector<std::unique_ptr<LocalJobQueue>> threadsJobQueues;
 };

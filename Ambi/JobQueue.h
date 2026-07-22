@@ -1,5 +1,8 @@
 #pragma once
 #include <functional>
+#include <mutex>
+#include <deque>
+
 /**
 * @class JobQueue
 * @brief Global Queue for Jobs. This class is responsible for managing the global queue of jobs that will be distributed to worker threads.
@@ -11,6 +14,11 @@ class JobQueue
 public:
 	JobQueue() = default;
 
+	JobQueue(const JobQueue&) = delete;
+	JobQueue& operator=(const JobQueue&) = delete;
+	JobQueue(JobQueue&&) = delete;
+	JobQueue& operator=(JobQueue&&) = delete;
+
 	/**
 	 * @brief Jobs will vary in their bodies, so we use std::function to allow for any callable type to be added as a job.
 	 *
@@ -18,7 +26,7 @@ public:
 	 * but the idea is that each worker thread will pull jobs from this queue and execute them.
 	 * @param job The Job to be added to the queue. This is a std::function that represents any callable type, allowing for flexibility in the types of jobs that can be added to the queue
 	*/
-	void AddJob(std::function<void()> job);
+	void AddJobs(std::function<void()> job);
 
 	/**
 	 * @brief A method to retrieve the current queue of jobs. This allows worker threads to access the jobs they need to process, with a reference being returned so the user can see the current state of the queue.
@@ -27,13 +35,22 @@ public:
 	 * The developer cannot edit the queue directly, but they can see the current state of the queue and how many jobs are currently in it. This is useful for debugging and monitoring the job queue.
 	 * @return The Global Job Queue
 	*/
-	std::vector<std::function<void()>>& GetJobs() { return jobQueue; };
+	std::deque<std::function<void()>>& GetJobs() { return jobQueue; };
+
+	/**
+	 * @brief Mutex for synchronizing access to shared resources.
+	 *
+	 * Ensures thread safety during job distribution and execution, preventing data races within the 'LocalJobQueue' class.
+	 */
+	std::mutex mtx;
 private:
 
 	/**
 	 * @brief The Vector that holds the queue of jobs.
 	 *
 	 * Holds all jobs that need to be processed by the worker threads.
+	 * 
+	 * Deque is used for efficiency and O(1) deletion at the front of the queue
 	*/
-	std::vector<std::function<void()>> jobQueue;
+	std::deque<std::function<void()>> jobQueue;
 };
